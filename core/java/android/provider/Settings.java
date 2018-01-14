@@ -4232,12 +4232,6 @@ public final class Settings {
         public static final String ENABLE_CONDITIONS = "enable_conditions";
 
         /**
-         * Disable dashboard suggestions in settings
-         * @hide
-         */
-        public static final String ENABLE_SUGGESTIONS = "enable_suggestions";
-
-        /**
          * Applications list where heasdup should't show
          *
          * @hide
