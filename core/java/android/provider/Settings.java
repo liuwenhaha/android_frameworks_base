@@ -4212,12 +4212,6 @@ public final class Settings {
         public static final String GLOBAL_ACTIONS_FLASHLIGHT = "global_actions_flashlight";
 
         /**
-         * Storage for the reboot option selected in Power tile
-         * @hide
-         */
-        public static final String QUICK_SETTINGS_REBOOT_OPTIONS = "quick_settings_reboot_options";
-
-        /**
          * @hide
          */
         public static final String QS_LAYOUT_COLUMNS = "qs_layout_columns";
