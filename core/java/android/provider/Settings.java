@@ -4294,12 +4294,6 @@ public final class Settings {
          */
         public static final String QS_TILE_HIDE_TITLE = "qs_tile_hide_title";
 
-        /**
-         * Whether to scramble a pin unlock layout
-         * @hide
-         */
-        public static final String LOCKSCREEN_PIN_SCRAMBLE_LAYOUT = "lockscreen_scramble_pin_layout";
-
         /** Whether to skip music track with volume rocker
          *  @hide
          */
