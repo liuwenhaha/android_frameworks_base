@@ -84,6 +84,7 @@ public class BatteryMeterView extends LinearLayout implements
     private boolean mCharging;
 
     private final int mEndPadding;
+    private final int mEndPaddingNoIcon;
 
     private boolean mQsHeaderOrKeyguard;
 
@@ -134,6 +135,8 @@ public class BatteryMeterView extends LinearLayout implements
         addView(mBatteryIconView, mlp);
 
         mEndPadding = res.getDimensionPixelSize(R.dimen.battery_level_padding_start);
+        mEndPaddingNoIcon = res.getDimensionPixelSize(
+                R.dimen.battery_level_padding_start_no_icon);
         updateShowPercent();
         setColorsFromContext(context);
         // Init to not dark at all.
@@ -291,7 +294,7 @@ public class BatteryMeterView extends LinearLayout implements
         }
         if (mBatteryPercentView != null) {
             mBatteryPercentView.setPaddingRelative(0, 0,
-                    mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_TEXT ? 0 : mEndPadding, 0);
+                    mStyle == BatteryMeterDrawableBase.BATTERY_STYLE_TEXT ? mEndPaddingNoIcon : mEndPadding, 0);
         }
         mDrawable.showPercentInsideCircle(!mShowPercentText);
     }
