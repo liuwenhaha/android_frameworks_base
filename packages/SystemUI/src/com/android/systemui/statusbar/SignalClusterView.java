@@ -18,7 +18,6 @@ package com.android.systemui.statusbar;
 
 import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_NONE;
-import static android.provider.Settings.Secure.STATUS_BAR_BATTERY_STYLE;
 
 import android.annotation.DrawableRes;
 import android.content.Context;
@@ -39,7 +38,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.android.settingslib.graph.BatteryMeterDrawableBase;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -109,7 +107,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     private final int mSecondaryTelephonyPadding;
     private final int mEndPadding;
     private final int mEndPaddingNothingVisible;
-    private final int mEndPaddingNoBattery;
     private final float mIconScaleFactor;
 
     private boolean mBlockAirplane;
@@ -118,7 +115,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
     private boolean mBlockEthernet;
     private boolean mActivityEnabled;
     private boolean mForceBlockWifi;
-    private boolean mNoBattery;
 
     private final IconLogger mIconLogger = Dependency.get(IconLogger.class);
 
@@ -142,7 +138,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         mEndPadding = res.getDimensionPixelSize(R.dimen.signal_cluster_battery_padding);
         mEndPaddingNothingVisible = res.getDimensionPixelSize(
                 R.dimen.no_signal_cluster_battery_padding);
-        mEndPaddingNoBattery = res.getDimensionPixelSize(R.dimen.signal_cluster_no_battery_padding);
 
         TypedValue typedValue = new TypedValue();
         res.getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
@@ -166,29 +161,24 @@ public class SignalClusterView extends LinearLayout implements NetworkController
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
-            ArraySet<String> blockList = StatusBarIconController.getIconBlacklist(newValue);
-            boolean blockAirplane = blockList.contains(SLOT_AIRPLANE);
-            boolean blockMobile = blockList.contains(SLOT_MOBILE);
-            boolean blockWifi = blockList.contains(SLOT_WIFI);
-            boolean blockEthernet = blockList.contains(SLOT_ETHERNET);
+        if (!StatusBarIconController.ICON_BLACKLIST.equals(key)) {
+            return;
+        }
+        ArraySet<String> blockList = StatusBarIconController.getIconBlacklist(newValue);
+        boolean blockAirplane = blockList.contains(SLOT_AIRPLANE);
+        boolean blockMobile = blockList.contains(SLOT_MOBILE);
+        boolean blockWifi = blockList.contains(SLOT_WIFI);
+        boolean blockEthernet = blockList.contains(SLOT_ETHERNET);
 
-            if (blockAirplane != mBlockAirplane || blockMobile != mBlockMobile
-                    || blockEthernet != mBlockEthernet || blockWifi != mBlockWifi) {
-                mBlockAirplane = blockAirplane;
-                mBlockMobile = blockMobile;
-                mBlockEthernet = blockEthernet;
-                mBlockWifi = blockWifi || mForceBlockWifi;
-                // Re-register to get new callbacks.
-                mNetworkController.removeCallback(this);
-                mNetworkController.addCallback(this);
-            }
-        } else if (STATUS_BAR_BATTERY_STYLE.equals(key)) {
-            final int style = newValue == null ?
-                BatteryMeterDrawableBase.BATTERY_STYLE_PORTRAIT : Integer.parseInt(newValue);
-            mNoBattery = /*style == BatteryMeterDrawableBase.BATTERY_STYLE_HIDDEN;*/false;
-
-            apply();
+        if (blockAirplane != mBlockAirplane || blockMobile != mBlockMobile
+                || blockEthernet != mBlockEthernet || blockWifi != mBlockWifi) {
+            mBlockAirplane = blockAirplane;
+            mBlockMobile = blockMobile;
+            mBlockEthernet = blockEthernet;
+            mBlockWifi = blockWifi || mForceBlockWifi;
+            // Re-register to get new callbacks.
+            mNetworkController.removeCallback(this);
+            mNetworkController.addCallback(this);
         }
     }
 
@@ -241,7 +231,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         int endPadding = mMobileSignalGroup.getChildCount() > 0 ? mMobileSignalGroupEndPadding : 0;
         mMobileSignalGroup.setPaddingRelative(0, 0, endPadding, 0);
 
-        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST, STATUS_BAR_BATTERY_STYLE);
+        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
 
         apply();
         applyIconTint();
@@ -546,7 +536,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
 
         boolean anythingVisible = mWifiVisible || mIsAirplaneMode
                 || anyMobileVisible || mVpnVisible || mEthernetVisible;
-        setPaddingRelative(0, 0, mNoBattery ? mEndPaddingNoBattery : (anythingVisible ? mEndPadding : mEndPaddingNothingVisible), 0);
+        setPaddingRelative(0, 0, anythingVisible ? mEndPadding : mEndPaddingNothingVisible, 0);
     }
 
     /**
