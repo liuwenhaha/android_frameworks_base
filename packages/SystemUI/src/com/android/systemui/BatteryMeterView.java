@@ -18,7 +18,6 @@ package com.android.systemui;
 import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
-import static android.provider.Settings.Secure.STATUS_BAR_BATTERY_STYLE;
 
 import android.animation.ArgbEvaluator;
 import android.app.ActivityManager;
@@ -62,7 +61,7 @@ import java.text.NumberFormat;
 public class BatteryMeterView extends LinearLayout implements
         BatteryStateChangeCallback, Tunable, DarkReceiver, ConfigurationListener {
 
-    private BatteryMeterDrawableBase mDrawable;
+    private final BatteryMeterDrawableBase mDrawable;
     private final String mSlotBattery;
     private final ImageView mBatteryIconView;
     private final CurrentUserTracker mUserTracker;
@@ -82,9 +81,6 @@ public class BatteryMeterView extends LinearLayout implements
     private float mDarkIntensity;
     private int mUser;
 
-    private final Context mContext;
-    private final int mFrameColor;
-
     /**
      * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings.
      */
@@ -103,7 +99,6 @@ public class BatteryMeterView extends LinearLayout implements
 
     public BatteryMeterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mContext = context;
 
         setOrientation(LinearLayout.HORIZONTAL);
         setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
@@ -112,7 +107,6 @@ public class BatteryMeterView extends LinearLayout implements
                 defStyle, 0);
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
                 context.getColor(R.color.meter_background_color));
-        mFrameColor = frameColor;
         mDrawable = new BatteryMeterDrawableBase(context, frameColor);
         atts.recycle();
 
@@ -207,8 +201,6 @@ public class BatteryMeterView extends LinearLayout implements
             boolean hidden = icons.contains(mSlotBattery);
             Dependency.get(IconLogger.class).onIconVisibility(mSlotBattery, !hidden);
             setVisibility(hidden ? View.GONE : View.VISIBLE);
-        } else if (STATUS_BAR_BATTERY_STYLE.equals(key)) {
-            updateBatteryStyle(newValue);
         }
     }
 
@@ -221,8 +213,8 @@ public class BatteryMeterView extends LinearLayout implements
         getContext().getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver, mUser);
         updateShowPercent();
-        Dependency.get(TunerService.class).addTunable(this,
-             StatusBarIconController.ICON_BLACKLIST, STATUS_BAR_BATTERY_STYLE);
+        Dependency.get(TunerService.class)
+                .addTunable(this, StatusBarIconController.ICON_BLACKLIST);
         Dependency.get(ConfigurationController.class).addCallback(this);
         mUserTracker.startTracking();
     }
@@ -358,12 +350,5 @@ public class BatteryMeterView extends LinearLayout implements
             super.onChange(selfChange, uri);
             updateShowPercent();
         }
-    }
-
-    private void updateBatteryStyle(String styleStr) {
-        final int style = styleStr == null ?
-                BatteryMeterDrawableBase.BATTERY_STYLE_PORTRAIT : Integer.parseInt(styleStr);
-
-        mDrawable.setMeterStyle(style);
     }
 }
