@@ -4285,11 +4285,6 @@ public final class Settings {
         /**
          * @hide
          */
-        public static final String ROAMING_INDICATOR_ICON = "roaming_indicator_icon";
-
-        /**
-         * @hide
-         */
         public static final String VOLUME_BUTTON_MUSIC_CONTROL = "volume_button_music_control";
 
         /**
